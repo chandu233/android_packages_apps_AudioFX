@@ -8,6 +8,7 @@ package org.lineageos.audiofx.backends;
 
 import android.content.Context;
 import android.media.AudioDeviceInfo;
+import android.media.audiofx.AudioEffect;
 
 import org.lineageos.audiofx.Constants;
 
@@ -22,6 +23,9 @@ public class EffectsFactory implements IEffectFactory {
 
     public EffectSet createEffectSet(Context context, int sessionId,
             AudioDeviceInfo currentDevice) {
+        if (getBrand() == Constants.EFFECT_TYPE_DOLBY) {
+            return new DolbyEffects(sessionId, currentDevice);
+        }
         // if this throws, we're screwed, don't bother to recover. these
         // are the standard effects that every android device must have,
         // and if they don't exist we have bigger problems.
@@ -36,6 +40,11 @@ public class EffectsFactory implements IEffectFactory {
     }
 
     private static int getBrandInternal() {
+        for (AudioEffect.Descriptor effect : AudioEffect.queryEffects()) {
+            if (DolbyEffects.EFFECT_TYPE_DAP.equals(effect.uuid)) {
+                return Constants.EFFECT_TYPE_DOLBY;
+            }
+        }
         return Constants.EFFECT_TYPE_ANDROID;
     }
 }

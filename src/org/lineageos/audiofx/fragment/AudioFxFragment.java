@@ -25,7 +25,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
+import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
@@ -36,6 +39,8 @@ import org.lineageos.audiofx.activity.ActivityMusic;
 import org.lineageos.audiofx.activity.EqualizerManager;
 import org.lineageos.audiofx.activity.MasterConfigControl;
 import org.lineageos.audiofx.activity.StateCallbacks;
+import org.lineageos.audiofx.backends.EffectsFactory;
+import org.lineageos.audiofx.service.AudioFxService;
 import org.lineageos.audiofx.widget.InterceptableLinearLayout;
 
 import java.util.List;
@@ -231,6 +236,9 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.devices, menu);
         mMenuDevices = menu.findItem(R.id.devices);
+        if (EffectsFactory.getBrand() == Constants.EFFECT_TYPE_DOLBY) {
+            inflater.inflate(R.menu.dolby, menu);
+        }
     }
 
     @Override
@@ -316,8 +324,93 @@ public class AudioFxFragment extends Fragment implements StateCallbacks.DeviceCh
         }
     }
 
+    // Tuned defaults of the Dolby profiles: smart, movie, music
+    private static final boolean[] DOLBY_DIALOGUE_SPEAKER = {false, true, false};
+    private static final boolean[] DOLBY_DIALOGUE_HEADPHONE = {true, true, false};
+    private static final boolean[] DOLBY_LEVELER_SPEAKER = {true, true, true};
+    private static final boolean[] DOLBY_LEVELER_HEADPHONE = {false, false, false};
+
+    private void showDolbyDialog() {
+        final SharedPreferences prefs = mConfig.getPrefs();
+        final AudioDeviceInfo device = mConfig.getCurrentDevice();
+        final boolean speaker = device == null
+                || device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
+
+        final View view = LayoutInflater.from(getActivity())
+                .inflate(R.layout.dialog_dolby, null);
+        final Spinner mode = view.findViewById(R.id.dolby_mode);
+        final Spinner ieq = view.findViewById(R.id.dolby_ieq);
+        final Switch dialogue = view.findViewById(R.id.dolby_dialogue);
+        final Switch leveler = view.findViewById(R.id.dolby_leveler);
+
+        final Runnable updateSwitches = () -> {
+            final int profile = mode.getSelectedItemPosition();
+            dialogue.setOnCheckedChangeListener(null);
+            leveler.setOnCheckedChangeListener(null);
+            dialogue.setChecked(prefs.getBoolean(Constants.DEVICE_AUDIOFX_DOLBY_DIALOGUE,
+                    (speaker ? DOLBY_DIALOGUE_SPEAKER : DOLBY_DIALOGUE_HEADPHONE)[profile]));
+            leveler.setChecked(prefs.getBoolean(Constants.DEVICE_AUDIOFX_DOLBY_LEVELER,
+                    (speaker ? DOLBY_LEVELER_SPEAKER : DOLBY_LEVELER_HEADPHONE)[profile]));
+            dialogue.setOnCheckedChangeListener((button, checked) -> {
+                prefs.edit().putBoolean(Constants.DEVICE_AUDIOFX_DOLBY_DIALOGUE, checked).apply();
+                mConfig.updateService(AudioFxService.DOLBY_CHANGED);
+            });
+            leveler.setOnCheckedChangeListener((button, checked) -> {
+                prefs.edit().putBoolean(Constants.DEVICE_AUDIOFX_DOLBY_LEVELER, checked).apply();
+                mConfig.updateService(AudioFxService.DOLBY_CHANGED);
+            });
+        };
+
+        mode.setSelection(Integer.parseInt(
+                prefs.getString(Constants.DEVICE_AUDIOFX_DOLBY_PROFILE, "0")));
+        ieq.setSelection(Integer.parseInt(
+                prefs.getString(Constants.DEVICE_AUDIOFX_DOLBY_IEQ, "0")));
+        updateSwitches.run();
+
+        mode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                final String value = String.valueOf(position);
+                if (!value.equals(prefs.getString(Constants.DEVICE_AUDIOFX_DOLBY_PROFILE, "0"))) {
+                    prefs.edit().putString(Constants.DEVICE_AUDIOFX_DOLBY_PROFILE, value).apply();
+                    mConfig.updateService(AudioFxService.DOLBY_CHANGED);
+                }
+                updateSwitches.run();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        ieq.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                final String value = String.valueOf(position);
+                if (!value.equals(prefs.getString(Constants.DEVICE_AUDIOFX_DOLBY_IEQ, "0"))) {
+                    prefs.edit().putString(Constants.DEVICE_AUDIOFX_DOLBY_IEQ, value).apply();
+                    mConfig.updateService(AudioFxService.DOLBY_CHANGED);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.dolby_atmos)
+                .setView(view)
+                .setPositiveButton(R.string.dolby_done, null)
+                .show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.dolby_atmos) {
+            showDolbyDialog();
+            return true;
+        }
+
         AudioDeviceInfo device = mMenuItems.get(item);
 
         if (device != null) {

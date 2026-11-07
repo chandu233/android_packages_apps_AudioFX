@@ -47,6 +47,7 @@ public class AudioFxService extends Service
     public static final int VIRTUALIZER_CHANGED = 0x4;
     public static final int VOLUME_BOOST_CHANGED = 0x10;
     public static final int REVERB_CHANGED = 0x20;
+    public static final int DOLBY_CHANGED = 0x40;
     public static final int ALL_CHANGED = 0xFF;
 
     private AudioOutputChangeListener mOutputListener;

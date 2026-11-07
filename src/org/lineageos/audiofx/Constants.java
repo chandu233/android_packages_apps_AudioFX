@@ -18,6 +18,7 @@ public class Constants {
 
     // effect type identifiers
     public static final int EFFECT_TYPE_ANDROID = 1;
+    public static final int EFFECT_TYPE_DOLBY = 2;
 
     // global settings
     public static final String AUDIOFX_GLOBAL_FILE = "global";
@@ -35,6 +36,7 @@ public class Constants {
     public static final String AUDIOFX_GLOBAL_HAS_REVERB = "audiofx.global.hasreverb";
     public static final String AUDIOFX_GLOBAL_HAS_VIRTUALIZER = "audiofx.global.hasvirtualizer";
     public static final String AUDIOFX_GLOBAL_PREFS_VERSION_INT = "audiofx.global.prefs.version";
+    public static final String AUDIOFX_GLOBAL_BRAND_INT = "audiofx.global.brand";
 
     // per-device settings
     public static final boolean DEVICE_DEFAULT_GLOBAL_ENABLE = false;
@@ -48,6 +50,10 @@ public class Constants {
     public static final String DEVICE_AUDIOFX_REVERB_PRESET = "audiofx.reverb.preset";
     public static final String DEVICE_AUDIOFX_VIRTUALIZER_ENABLE = "audiofx.virtualizer.enable";
     public static final String DEVICE_AUDIOFX_VIRTUALIZER_STRENGTH = "audiofx.virtualizer.strength";
+    public static final String DEVICE_AUDIOFX_DOLBY_PROFILE = "audiofx.dolby.profile";
+    public static final String DEVICE_AUDIOFX_DOLBY_IEQ = "audiofx.dolby.ieq";
+    public static final String DEVICE_AUDIOFX_DOLBY_DIALOGUE = "audiofx.dolby.dialogue";
+    public static final String DEVICE_AUDIOFX_DOLBY_LEVELER = "audiofx.dolby.leveler";
 
     public static final String DEVICE_AUDIOFX_EQ_PRESET = "audiofx.eq.preset";
     public static final String DEVICE_AUDIOFX_EQ_PRESET_LEVELS = "audiofx.eq.preset.levels";

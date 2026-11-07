@@ -42,4 +42,32 @@
 
     <string name="rename">Rename</string>
     <string name="remove_custom_preset_warning_message">Are you sure you want to remove %1$s?</string>
+
+    <!-- Dolby Atmos -->
+    <string name="dolby_atmos">Dolby Atmos</string>
+    <string name="dolby_mode">Mode</string>
+    <string name="dolby_mode_smart">Smart</string>
+    <string name="dolby_mode_movie">Movie</string>
+    <string name="dolby_mode_music">Music</string>
+    <string name="dolby_intelligent_eq">Intelligent equalizer</string>
+    <string name="dolby_ieq_off">Off</string>
+    <string name="dolby_ieq_balanced">Balanced</string>
+    <string name="dolby_ieq_warm">Warm</string>
+    <string name="dolby_ieq_detailed">Detailed</string>
+    <string name="dolby_dialogue_enhancer">Dialogue enhancer</string>
+    <string name="dolby_volume_leveler">Volume leveler</string>
+    <string name="dolby_done">Done</string>
+
+    <string-array name="dolby_modes" translatable="false">
+        <item>@string/dolby_mode_smart</item>
+        <item>@string/dolby_mode_movie</item>
+        <item>@string/dolby_mode_music</item>
+    </string-array>
+
+    <string-array name="dolby_ieq_presets" translatable="false">
+        <item>@string/dolby_ieq_off</item>
+        <item>@string/dolby_ieq_balanced</item>
+        <item>@string/dolby_ieq_warm</item>
+        <item>@string/dolby_ieq_detailed</item>
+    </string-array>
 </resources>

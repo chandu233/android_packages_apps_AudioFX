@@ -32,6 +32,7 @@ import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 
+import org.lineageos.audiofx.Constants;
 import org.lineageos.audiofx.backends.EffectSet;
 import org.lineageos.audiofx.backends.EffectsFactory;
 import org.lineageos.audiofx.eq.EqUtils;
@@ -53,6 +54,9 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
 
     private AudioDeviceInfo mCurrentDevice = null;
 
+    // Some backends only work globally, on the output mix
+    private final boolean mGlobalSession;
+
     // audio priority handler messages
     private static final int MSG_UPDATE_DSP = 100;
     private static final int MSG_ADD_SESSION = 101;
@@ -66,6 +70,11 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
         mDevicePrefs = devicePrefs;
         mCurrentDevice = outputDevice;
         mHandler = new Handler(handler.getLooper(), new AudioServiceHandler());
+
+        mGlobalSession = EffectsFactory.getBrand() == Constants.EFFECT_TYPE_DOLBY;
+        if (mGlobalSession) {
+            mHandler.obtainMessage(MSG_ADD_SESSION, 0).sendToTarget();
+        }
     }
 
     public void onDestroy() {
@@ -91,6 +100,9 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
     }
 
     public void addSession(int stream) {
+        if (mGlobalSession) {
+            return;
+        }
         synchronized (mAudioSessionsL) {
             // Never auto-attach is someone is recording! We don't want to interfere
             // with any sort of loopback mechanisms.
@@ -109,6 +121,9 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
     }
 
     public void removeSession(int stream) {
+        if (mGlobalSession) {
+            return;
+        }
         synchronized (mAudioSessionsL) {
             if (!mHandler.hasMessages(MSG_REMOVE_SESSION, stream)) {
                 final EffectSet effects = mAudioSessionsL.get(stream);
@@ -173,6 +188,29 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
             if (!session.beginUpdate()) {
                 Log.e(TAG, "session " + session + " failed to beginUpdate()");
                 return;
+            }
+
+            // Dolby, the profile first as the other settings are per profile.
+            // Unset values keep the tuned defaults of the profile.
+            try {
+                if ((flags & AudioFxService.DOLBY_CHANGED) > 0 && session.hasDolbySettings()) {
+                    session.setDolbyProfile(Integer.parseInt(
+                            prefs.getString(Constants.DEVICE_AUDIOFX_DOLBY_PROFILE, "0")));
+                    if (prefs.contains(Constants.DEVICE_AUDIOFX_DOLBY_IEQ)) {
+                        session.setDolbyIntelligentEq(Integer.parseInt(
+                                prefs.getString(Constants.DEVICE_AUDIOFX_DOLBY_IEQ, "0")));
+                    }
+                    if (prefs.contains(Constants.DEVICE_AUDIOFX_DOLBY_DIALOGUE)) {
+                        session.setDolbyDialogueEnhancer(
+                                prefs.getBoolean(Constants.DEVICE_AUDIOFX_DOLBY_DIALOGUE, false));
+                    }
+                    if (prefs.contains(Constants.DEVICE_AUDIOFX_DOLBY_LEVELER)) {
+                        session.setDolbyVolumeLeveler(
+                                prefs.getBoolean(Constants.DEVICE_AUDIOFX_DOLBY_LEVELER, false));
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error applying Dolby settings!", e);
             }
 
             // equalizer
@@ -252,7 +290,8 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
                          * msg.obj = sessionId
                          */
                         sessionId = (Integer) msg.obj;
-                        if (sessionId == null || sessionId <= 0) {
+                        if (sessionId == null || sessionId < 0
+                                || (sessionId == 0 && !mGlobalSession)) {
                             break;
                         }
 
@@ -319,7 +358,8 @@ class SessionManager implements AudioOutputChangeListener.AudioOutputChangedCall
                         sessionId = (Integer) msg.obj;
                         flags = msg.arg1;
 
-                        if (sessionId == null || sessionId <= 0) {
+                        if (sessionId == null || sessionId < 0
+                                || (sessionId == 0 && !mGlobalSession)) {
                             break;
                         }
 

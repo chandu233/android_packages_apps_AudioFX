@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:paddingStart="24dp"
+              android:paddingEnd="24dp"
+              android:paddingTop="16dp">
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dolby_mode"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <Spinner
+            android:id="@+id/dolby_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:entries="@array/dolby_modes" />
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dolby_intelligent_eq"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <Spinner
+            android:id="@+id/dolby_ieq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:entries="@array/dolby_ieq_presets" />
+
+    <Switch
+            android:id="@+id/dolby_dialogue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/dolby_dialogue_enhancer" />
+
+    <Switch
+            android:id="@+id/dolby_leveler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/dolby_volume_leveler" />
+
+</LinearLayout>

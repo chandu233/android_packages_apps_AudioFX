@@ -177,6 +177,23 @@ public abstract class EffectSet {
     public void setReverbPreset(short preset) {
     }
 
+    // Dolby specific settings
+    public boolean hasDolbySettings() {
+        return false;
+    }
+
+    public void setDolbyProfile(int profile) {
+    }
+
+    public void setDolbyIntelligentEq(int preset) {
+    }
+
+    public void setDolbyDialogueEnhancer(boolean enable) {
+    }
+
+    public void setDolbyVolumeLeveler(boolean enable) {
+    }
+
     /**
      * How long should we delay for when releasing the effects? This helps certain effect
      * implementations when the app is reusing a session ID. By default this behavior is disabled.

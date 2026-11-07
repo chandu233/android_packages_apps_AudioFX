@@ -110,7 +110,11 @@ public class DevicePreferenceManager
         SharedPreferences prefs = Constants.getGlobalPrefs(mContext);
 
         final int currentPrefVer = prefs.getInt(Constants.AUDIOFX_GLOBAL_PREFS_VERSION_INT, 0);
+        // The defaults come from the backend, rebuild them when it changes
+        final int brand = EffectsFactory.getBrand();
         boolean needsPrefsUpdate = currentPrefVer < CURRENT_PREFS_INT_VERSION
+                || prefs.getInt(Constants.AUDIOFX_GLOBAL_BRAND_INT,
+                        Constants.EFFECT_TYPE_ANDROID) != brand
                 || overridePrevious;
 
         if (needsPrefsUpdate) {
@@ -184,6 +188,7 @@ public class DevicePreferenceManager
                 .edit()
                 .putInt(Constants.AUDIOFX_GLOBAL_PREFS_VERSION_INT,
                         CURRENT_PREFS_INT_VERSION)
+                .putInt(Constants.AUDIOFX_GLOBAL_BRAND_INT, brand)
                 .putBoolean(Constants.SAVED_DEFAULTS, true)
                 .apply();
     }
